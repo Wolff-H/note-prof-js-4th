@@ -1,0 +1,47 @@
+
+
+
+1.什么是JavaScript
+    1.简短的历史回顾
+        。。。
+
+2.JavaScript实现
+    JavaScript =
+    {
+        ECMAScript,    语言核心   
+        DOM,    文档对象模型   
+        BOM,    浏览器对象模型   
+    }
+    [-注释:
+        "ECMA"，欧洲计算机制造商协会
+    -]
+    
+    1.ECMAScript
+        读作"ek-ma-script"
+        1.版本
+            ECMAScript 1、2、3、4、5、6、7、8、9、10
+        2.ES符合性
+            要成为ES实现的必须条件
+            。。。
+    2.DOM
+        文档对象模型（DOM，"Document Object Model"）是一个应用编程接口（API），用于在HTML中使用扩展的XML。
+        DOM将整个页面抽象为一组分层节点。HTML或XML页面的每个组成部分都是一种节点，包含不同的数据。
+        1.为什么DOM是必需的
+            为了统一各个浏览器间的html操作
+        2.DOM级别
+            DOM Level 1、2、3、4(living standard)
+        3.其他DOM
+            在DOM Core与DOM html外，其他语言发布的自己的DOM标准（方法、接口）
+                · svg
+                · MathML
+                · SMIL
+        4.浏览器对DOM的支持情况
+            。。。
+    3.BOM
+        用于支持访问和操作浏览器的窗口。使用BOM，开发者可以操控浏览器显示页面之外的部分。
+        。。。
+    
+3.JavaScript版本
+    。。。
+
+//

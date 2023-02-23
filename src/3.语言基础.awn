@@ -1,0 +1,857 @@
+>>>>
+```yaml
+标题: 3.语言基础
+摘要:
+    - 语法
+    - 数据类型
+    - 流控制语句
+```
+<<<<
+
+
+在2017年+的时点，ES6+特性已被广泛支持，所以本章节主讲ES6+。
+
+1.语法
+    1.区分大小写  case sensitive   
+        ES中一切都区分大小写，包括变量、函数、操作符等。
+    2.标识符  identifier   
+        1.定义
+            标识符，即变量、函数、属性或参数的名称。
+        2.语法
+            起首以字母、下划线_、美元符号$
+            余下以字母、下划线_、美元符号$、数字
+            [-注释: 字母可以是ASCII或Unicode中的任何字母，所以用中文也可以 -]
+        3.惯例风格
+            ES标识符的惯例写法是小驼峰，如 myCar, doSomethingImportant
+            [-评论: 我本人是小写下划线党 -]
+    3.注释
+        ```js
+            // 这是单行注释
+            /*   
+                这是多行注释
+            */
+        ```
+    4.严格模式  strict mode   
+        使用预处理指令字串 "use strict"
+        任何不合规（ES5+）的代码写法都会抛出错误。
+        严格模式指令字串放置位置的不同会作用于不同词法范围。
+        1.全文件严格
+            指令放在文件顶部
+        2.单函数严格
+            指令放在函数顶部
+    5.语句  statements   
+        1.分号结尾  ending semicolon   
+            用分号来确定语句结束。但分号不是必需的，因为解析器会自动确定语句的结尾。
+            [-评论: 我本人是无分号党 -]
+        2.代码块  code block   
+            以`{}`包含的代码内容是一个代码块
+        3.控制语句代码块
+            if、while等控制语句在执行单行语句时可不使用代码块。但建议总是使用。
+            
+2.关键字 & 保留字  keywords & reserved words   
+    保留字是具有特殊用途的字，但不一定已经在语法中实装。
+    关键字是已实装的保留字。
+    1.ES6+的关键字
+        ```
+            break		do             in		     typeof
+            case		else           instanceof    var
+            catch		export		   new		     void
+            class		extends		   return		 while
+            const		finally        super		 with
+            continue	for            switch		 yield
+            debugger	function       this
+            default		if             throw
+            delete      import         try
+        ```
+    2.ES6+的保留字
+        ```
+            enum        implements     package       public
+            interface   protected      static        let
+            private     await          async
+        ```
+
+3.变量
+    ES的变量是弱类型的，一个变量可以保存任何类型的值。
+    声明变量的关键字有`var`、`let`、`const`。
+    [-补充: 
+        1.无声明定义的变量
+            1.语法
+                ```js
+                    message
+                ```
+                将会在全局作用域下创建变量 message。
+    -]
+    1.var
+        1.语法
+            ```js
+                var message    // 不初始赋值，则值为undefined
+                var message = 'hello'    // 赋值为string类型的'hello'
+            ```
+        2.作用域
+            所在函数
+        3.声明提升
+            ES的运行时，会对函数内声明的变量作提升，将它们都「提拉到函数顶部」。
+            也即，在正式运行代码前，先遍历一遍代码，提取其中所有的 var 声明，顺序执行一遍默认声明。
+            1.例子
+                ```js
+                    function foooo()
+                    {
+                        console.log(age)
+                        var age = 26
+                    }
+                    foooo()
+                ```
+                上面这段代码并不会报错，而是在控制台输出了 undefined。因为实际上，这段代码等价于
+                ```js
+                    function foooo()
+                    {
+                        var age
+                        console.log(age)
+                        var age = 26
+                    }
+                    foooo()
+                ```
+                age 在它的正式声明之前，被提升到顶部进行了一遍默认声明，所以在执行到 console.log(age) 时，age 的值是 undefined。
+    2.let
+        1.语法
+            ```js
+                let message
+                let message = 'hello'
+            ```
+        作用同 var，区别在于
+        2.块作用域
+            let 声明的变量作用域是所在块
+        3.暂时性死区  temporal dead zone   
+            let 声明的变量不被提升
+            1.机制
+                JS 引擎在解析代码时，会像检查 var 那样先检查所有的 let，将它们提升到顶部。
+                但是，在真正执行到 let 声明前，不允许任何对未声明 let 的引用。
+                所以，在表现上，就是 let 不被提升。
+        2.全局声明
+            在全局作用域中声明的 let 变量不会被添加为 window 对象的属性，而 var 会。
+        3.条件声明  conditional declaration   
+            "条件声明模式"，即 var 型声明模式，若同名变量在之前已经声明过，可以覆盖声明。
+            而 let 禁止冗余声明，即 let 不能重复声明同名变量。
+        4.在 for 循环中
+            在 var 声明的 for 循环中，var 迭代变量会被置于循环外层作用域。
+            ```js
+                for(var i = 0; i < 5; i++)
+                {
+                    // 循环逻辑
+                }
+                console.log(i) // 控制台输出：5
+            ```
+            在 let 声明的 for 循环中，let 迭代变量仅生鲜于循环体内。
+            ```js
+                for(let i = 0; i < 5; i++)
+                {
+                    // 循环逻辑
+                }
+                console.log(i) // 控制台输出：ReferenceError: i is not defined
+            ```
+            更奇特的，举个例子，看下面这段代码：
+            ```js
+                for(var i = 0; i < 5; ++i)
+                {
+                    setTimeout(() => console.log(i), 0) 
+                } 
+            ```
+            你可能以为会输出 0、1、2、3、4。
+            但实际上会输出 5、5、5、5、5。
+            如果改为使用 let 声明：
+            ```js
+                for(let i = 0; i < 5; ++i)
+                {
+                    setTimeout(() => console.log(i), 0) 
+                } 
+            ```
+            将会输出 0、1、2、3、4。
+            [-评论:
+                （这是我自己的解释，非书面解释）
+                var 与 let 在 for 循环中的不同表现，是因为，在 var 声明的循环中，var 迭代值始终指向存在于循环外的那个变量，而这个变量在循环结束后，timeout 事件队列执行前，一路叠加到了5。
+                而 let 声明的变量，在每次迭代中是一个独立实例（这是合理的，因为 let 不能在当次迭代之外存在）。
+                同时，这里还有一个容易认知错误的点。函数的参数在函数调用时才被计算。实际上，console.log(i) 中的 i 在循环体中不会直接被赋写为具体的数，尽管 i 本身是一个基本值。
+            -]
+    3.const
+        1.语法
+            ```js
+                const message = 'hello'
+            ```
+            const 的作用同 let，区别在于：
+                · const 在声明时必须初始化赋值。
+                · const 限制指向的引用（内存地址）不可变。
+                    不过，如果 const 指向一个对象，这个对象的内部是可以随便改的。
+    4.变量声明风格
+        · 优先使用 const
+            当你确定某些变量不会被更改，总是声明其为 const
+        · 其次使用 let
+            声明在之后会改动的变量
+        · 不要使用 var
+            因为 var 的表现怪异
+
+4.数据类型  data types   
+    ES 的数据类型有两大类共7种
+        1.原始类型
+            Undefined、Null、Boolean、Number、String、Symbol
+        2.引用类型
+            Object
+    1.typeof 操作符
+        因为 ES 是弱类型的，所以用 typeof 来确定任给一个变量的（原始）类型。
+        1.语法
+            ```js
+                typeof some_variable // 返回类型
+            ```
+        2.例子
+            ```js
+                let message = 'nice to meet you too'
+                console.log(typeof message) // 'string'
+            ```
+        1.typeof 返回字与目标类型
+            typeof 返回名称：     目标变量类型：
+                undefined              值未定义
+                boolean                布尔值
+                string                 字串
+                number                 数
+                object                 对象或null
+                function               函数
+                symbol                 符号
+            [-补充:
+                `typeof null`得到`object`，是因为
+                    null 值，在设计上被期望是，对空对象的引用
+                不过本质还是 JS 历史遗留的设计缺陷
+                    正常来讲，null 值，就应该是，null 个体本身
+            -]
+    2.undefined
+        任何未初始化的变量（即已定义，但未赋值），其值都为`undefined`，以区别于空对象指针`null`。
+        然而，typeof 一个未定义（不存在的）变量，也会返回 undefined。
+        1.最佳实践
+            在声明变量时总是初始化其一个有意义的值。
+        [-补充:
+            undefined 其实是 JS 历史遗留的一个设计失误。
+            当访问一个不存在的值，正常来讲，应该抛出错误(throw error)，而不是返回什么 undefined。
+        -]
+    3.null
+        null 在设计上被期望用作空对象指针。
+        1.最佳实践
+            在声明一个用来保存对象值的变量时，总是使用 null 来初始化（如果要表示空，没有初值）。
+            这样，通过 obj === null 就能判断obj是否被赋予了一个实有对象的引用。
+            [-补充:
+                否则，如果不这样做，在判断一个值是否是空对象时，你将会需要：
+                ```js
+                    let obj = {}
+                    obj.constructor === Object && Object.keys(obj).length === 0
+                ```
+            -]
+    4.boolean
+        1.转换为布尔值
+            1.Boolean(input)
+                使用 JS 内建方法 Boolean，可以将任意值转换为布尔值。
+                转换关系为：
+                    · boolean
+                        返回 输入
+                    · string
+                        1、非空字串
+                            返回 true
+                        2、空字串
+                            返回 false
+                    · number
+                        1、非零数值
+                            返回 true
+                        2、零，NaN
+                            返回 false
+                    · object
+                        1、对象
+                            返回 true
+                        2、null
+                            返回 false
+                    · undefined
+                        1、不存在的值
+                            返回 错误
+                        2、undefined
+                            返回 false
+                ```js
+                    function Boolean(x: boolean) {
+                        return x
+                    }
+                    function Boolean(x: string) {
+                        return [''].includes(x) ? false : true
+                    }
+                    function Boolean(x: number) {
+                        return [0, NaN].includes(x) ? false : true
+                    }
+                    function Boolean(x: Object) {
+                        return [null].includes(x) ? false : true
+                    }
+                    function Boolean(x: undefined) {
+                        try{ x } // 如果 x 是不存在的值，抛出错误
+                        return false
+                    }
+                ```
+    5.number
+        [-补充:
+            1.JS 中的数值进制表示
+                · 2进制
+                    0b进制值
+                · 8进制
+                    0o进制值
+                · 16进制
+                    0x进制值
+        -]
+        1.浮点数
+            浮点数必须以小数形式表示。
+            1.整值浮点数
+                如果一个小数数，其值是整数，则该数被视为整数。
+                由于在内存中保存浮点数所使用的空间是整数的两倍，js 在保存数值时总是寻求该值是否能被转换为整数保存。
+                1.例子
+                    ```js
+                        >>  let num = 10.000
+                        >>  num
+                        <-  10
+                    ```
+            2.科学计数法表示
+                对于非常大或非常小的数，可以用科学计数法表示。
+                1.语法
+                    数值部分后面接字母e（小写大写均可）后面接十的幂数。
+                    ```js
+                        数值部分e十的幂数
+                    ```
+                2.例子
+                    ```js
+                        >>  let big_num = 3.125e7
+                        >>  big_num
+                        <-  31250000
+                        
+                        >>  let sml_num = 3.125e-7
+                        >>  sml_num
+                        <-  0.0000003125
+                    ```
+        2.值范围
+            ES 可表示的最大最小数值是：
+                `Number.MIN_VALUE`
+                `Number.MAX_VALUE`
+            如果一个数超出了这个范围，该数会被自动转换为
+                `-Infinity`
+                `Infinity`
+            注意"无限"不可参与计算。因为并没有对于无限的数字表示。
+            在计算可能取到无限的运算时，使用`isFinite(num)`函数判断。
+            1.例子：在计算中检查可能发生的“无限”值
+                ```js
+                    >>  t = Number.MAX_VALUE + Number.MAX_VALUE
+                    >>  console.log(isFinite(result))
+                    <-  false
+                ```
+        3.NaN  Not a Number   
+            `NaN`（非数值）是一个特殊的数值，用于表示原本要返回数值的操作失败了，返回 NaN 表达这种情况，而不是抛出错误。
+            NaN 具有一些特殊的性质。
+                · 任何涉及 NaN 的运算恒返回 NaN
+                · NaN 不等于任何值
+                    所以你不能用 NaN == NaN 来判断一个值是不是 NaN，而要使用 ES 的`isNaN()`内建函数。
+                    isNaN(x) 会判断入参 x 能否被转换为数值，如果不能则判为 NaN，返回 true。
+        4.转换为数值
+            有3个函数可以将非数值转为数值：Number()、parseInt()、parseFloat()，后两个更多用于从字串中解析数值。
+            1.Number(input)
+                转换关系为：
+                    · boolean
+                        1、true
+                            返回 1
+                        2、false
+                            返回 0
+                    · number
+                        返回 输入
+                    · null
+                        返回 0
+                    · undefined
+                        返回 NaN
+                    · string
+                        1、正好含一整数/浮点数（包括前缀正负号）
+                            返回 该整数/浮点数
+                        2、正好含一十六进制数
+                            返回 该进制数的十进制数
+                        3、空字串
+                            返回 0
+                        4、其他
+                            返回 NaN
+                    · 对象
+                        先调用对象的 valueOf() 方法获取返回值，然后按上述规则转换返回值。如果转换结果是 NaN，则调用 toString() 方法转换成字串。
+            2.parseInt()
+                。。。
+            3.parseFloat()
+                。。。
+    6.string
+        [-补充:
+            1.字面量  literal   
+                字面量是源码中，固定的、直接的，值的表示。
+            2.语法
+                以
+                    1、''
+                    2、""
+                    3、``
+                包含的内容都是一段字串。
+        -]
+        1.字符字面量
+            \n      换行
+            \t      制表
+            \b      退格
+            \r      回车
+            \f      换页
+            \\      反斜杠
+            \'      单引号
+            \"      双引号
+            \`      反引号
+            \xnn    16进制编码表示的字符
+            \unnn   16进制编码表示的Unicode字符
+        2.字串不可变性  immutable   
+            字串是不可变(immutable)变量，一旦创建，不可改其中的值。
+            如果要修改一个字串变量，只有先销毁原始字串，然后将这个变量赋值为新的字串值。
+            1.例子
+                ```js
+                    let lang = 'Java'
+                    lang = lang + 'Script'
+                ```
+                这里，一开始，变量 lang 的值是 'Java'，然后被赋值为 'Java' 和 'Script' 的拼接。
+                具体过程是：首先，分配一个足够容纳10个字符的空间，然后填充上 'Java' 和 'Script'，最后销毁原始的 'Java' 字串和 'Script' 字串。
+        3.转换为字串
+            有两种方式用来将一个值转为字串。
+                1、任何值都自带具有的 toString() 方法
+                2、String() 方法
+            1.toString()
+                除了 null 和 undefined 基本值以外，任何值都具有 toString() 方法。
+                [-补充:
+                    特别地，在对数值 toString() 时，可以指定一个基数，将返回依据该基数转换后的字串。
+                    1.语法
+                        ```js
+                            some_number.toString(base: number)
+                        ```
+                    2.例子
+                        ```js
+                            let num = 10
+                            num.toString()      // "10"
+                            num.toString(2)     // "1010"
+                            num.toString(8)     // "12"
+                            num.toString(16)    // "a"
+                        ```
+                -]
+        4.模板字面量  template literal   
+            1.语法
+                由一对反引号"``"包含的字串字面量称模板字面量。
+            2.特性
+                1.保留换行
+                    在源码中的换行会被保留到最终字串中。
+                    1.例子
+                        ```js
+                            let str_a =`line1
+                            line2
+                            `
+                            
+                            >>  str_a
+                            <-  'line1'
+                                'line2'
+                            
+                            let str_b =`
+                            line1
+                            line2
+                            `
+                            
+                            >>  str_b
+                            <-            // 此处多一个换行符
+                                'line1'
+                                'line2'
+                        ```
+                2.保留空格
+                    在源码中的空格会被保留到最终字串中。
+                        ```js
+                            let str_c =`
+                                line1
+                                line2
+                            `
+                            
+                            >>  str_a
+                                
+                                '    line1'
+                                '    line2'
+                        ```
+        5.模板插值  interpolation   
+            1.语法
+                在模板字串的"${}"中填入表达式。
+                ```js
+                    `${表达式}`
+                ```
+            技术上讲，模板字面量不是字符串，而是一种特殊的 JavaScript 句法表达式，只不过求值后得到的是字符串。
+            模板字面量在定义时立即求值并转换为字符串实例，任何插入的变量也会从它们最接近的作用域中取值。
+            所有插入值会通过 toString() 强制转为字串。
+        6.模板标签函数  template tag functions   
+            [-参考|扩展|资料:
+                《ES6 教程》by 阮一峰
+            -]
+            模板字面量支持与模板标签函数("tag function")联用。
+            模板标签函数实际就是个常规函数。使用时，将模板标签函数前缀在模板字面量前。标签函数将会收到的参数是依次为
+                · 模板字面量的基底原始字串，的序列数组
+                · 模板字面量中的每个插值成分的值（${}插值表达式的求值结果）
+            1.语法
+                tagFunction`template_literal`
+            
+                tagFunction 将会接收到的入参是
+                ```ts
+                    function tagFunction(base_segments: string[], exp1_computed: any, exp2_computed: any, ...more: any[])
+                    {
+                        // 
+                    }
+                ```
+            2.例子
+                ```js
+                    let a = 6
+                    let b = 9
+                    
+                    function tagfunc_sum(base_segments, a_val, b_val, sum_val)
+                    {
+                        console.log(base_segments)
+                        console.log(a_val)
+                        console.log(b_val)
+                        console.log(sum_val)
+                        
+                        return 'AMD YES!'
+                    }
+                    
+                    >>  demoTag`${a} + ${b} = ${a+b}`
+                    <-  ["", " + ", " = ", ""]
+                    <-  6
+                    <-  9
+                    <-  15
+                    <-  "AMD YES!"
+                ```
+                在实际操作中，如果表达式个数不确定，通常用剩余操作符将它们收集到一个数组。
+            3.在标签函数中求得整个模板的值
+                很多时候，在标签函数中，除了处理模板中的成分，你也想取得最终的整个模板字面量值（而不是在外部再单独cv一遍求值）
+                那么可以使用如下的算法
+                ```js
+                    function tagfunc_zip(segments, ...members)
+                    {
+                        // 因为基底片段项总是与插值项交错且多一的 //
+                        return segments[0] + members.map((m, i) => `${m}${segments[i+1]}`).join('')
+                    }
+
+                    >>  let template_literal_computed = `${a} + ${b} = ${a+b}`
+                    <-  "6 + 9 = 15"
+                    >>  let template_literal_zipped = tagfunc_zip`${a} + ${b} = ${a+b}`
+                    <-  "6 + 9 = 15"
+                ```
+        7.原始字符串 String.raw()  raw strings   
+            [-待补:-]
+            使用 String.raw 方法后接模板字串，将返回原始 Unicode 字符串。（代码中的回车除外）
+
+            `String.raw()`是一个内建的模板标签函数，返回后接的模板字面量的原始字串内容。
+            原始字串的求值：
+                · 插值成分会正常计算求值。
+                · 基底中由`\`引导的转义字符（如 Unicode 字符和换行符）不会被转义解释，而是直接字面输出。
+                · 代码中的换行符仍会保留。
+            1.例子
+                ```js
+                    // Unicode 示例： //
+                    // \u00A9 是版权符号 copyright 圈C //
+                    >>  `\u00A9`
+                    <-  '©'
+
+                    // 换行符示例： //
+                    // 转义字符的换行符 //
+                    >>  `first line\nsecond line`
+                    <-  'first line'
+                        'second line'
+                    
+                    >>  String.raw`first line\nsecond line`
+                    <-  'first line\nsecond line'
+
+                    // 代码中实在的换行符 //
+                    >>  `first line
+                        second line`
+                    <-  'first line'
+                        'second line'
+
+                    >>  String.raw`first line
+                        second line`
+                    <-  'first line'
+                        'second line'
+                ```
+                可以看到，代码中实在的换行符不会被表达为转义字符。
+    7.symbol
+        "Symbol"（符号）是 ES6 新增的数据类型。符号是原始值，且符号实例是唯一、不可变的。
+        符号的用途是确保对象属性使用唯一标识符，不会发生属性冲突的危险。 
+        尽管听起来跟私有属性有点类似，但符号并不是为了提供私有属性的行为才增加的（尤其是因为 Object API 提供了方法，可以更方便地发现符号属性）。
+        相反，符号就是用来创建唯一记号，进而用作非字串形式的对象属性。
+
+        1.基本用法
+            符号需要使用 Symbol() 函数初始化。因为符号本身是原始类型，所以 typeof 操作符对符号返回 symbol。
+            1.语法
+                ```ts
+                    // 构造函数 //
+                    function Symbol(
+                        description?: string // 对实例的描述
+                    ) { ... }
+
+                    // 创建实例 //
+                    const some_symbol = Symbol()
+                    const some_symbol = Symbol('description for this symbol instance.')
+                ```
+            【】
+        2.使用全局符号注册表
+            【】
+        3.使用符号作为属性
+            【】
+        4.常用内置符号
+            【】
+        5.Symbol.asyncIterator（对象上实现的异步迭代器）
+            【】
+        6.Symbol.hasInstance
+            【】
+        7.Symbol.isConcatSpreadable
+            【】
+        8.Symbol.iterator
+            【】
+        9.Symbol.match
+            【】
+        10.Symbol.replace
+            【】
+        11.Symbol.search
+            【】
+        12.Symbol.species
+            【】
+        13.Symbol.split 
+            【】
+        14.Symbol.toPrimitive
+            【】
+        15.Symbol.toStringTag
+            【】
+        16.Symbol.unscopables
+            【】
+    8.object
+        对象是数据与行为（属性与方法）的集合。
+        Object 类是所有对象的基类。
+        1.Object 原生属性/方法
+            只要是 Object 的实例，都具有：
+            1.constructor
+                用于创建当前对象的构造器函数。
+            2.hasOwnProperty(propertyName: string | symbol)
+                判断，当前对象实例上，是否存在入参属性。
+            3.isPrototypeOf(object: object)
+                用于判断当前对象是否为另一个对象的原型。
+            4.propertyIsEnumerable(propertyName: string | symbol)
+                判断，当前对象实例上，入参属性是否可以被枚举。如，被 for-in 遍历。
+            5.toLocaleString()
+                根据本地化执行环境，返回对象的字符串表示。
+            6.toString()
+                返回对象的字符串表示。
+            7.valueOf()
+                返回对象对应的字符串、数值或布尔值表示。通常与 toString() 的返回值相同。
+5.操作符  operators   
+    操作符用于操作数据值。ES 中的操作符很独特，因为它们可用于任何值，包括基本值、字串、甚至对象。
+    在应用于对象时，操作符通常会调用 valueOf() 和/或 toString() 方法来取得可计算的值。
+    1.一元操作符  unary operator   
+        一元操作符，是只操作一个值的操作符。
+        1.自增/自减  increase/decrease   
+            令一个变量+1或-1
+            1.语法
+                将操作符`++`、`--`前缀或后缀与目标值。
+                ```js
+                    let some_value
+
+                    ++some_value
+                    --some_value
+                    some_value++
+                    some_value--
+                ```
+                例如，"++some_value"等价于"some_value = some_value + 1"。
+            2.放置位置
+                有前缀、后缀两种放置方式。但前后缀放置只在变量处于求值语句中时有区别。
+                1.前缀放置
+                    变量在所在语句求值前被改变。
+                2.后缀放置
+                    变量在所在语句求值后被改变。
+                当语句中有多个自增自减，则按照正常语句结算顺序结算
+                3.例子
+                    前缀、后缀自增自减的时序区别。
+                    ```js
+                        // 前缀自减 //
+                        let num1 = 2
+                        let num2 = 20
+                        let num3 = --num1 + num2
+                        let num4 = num1 + num2
+
+                        >>  num3
+                        <-  21
+                        >>  num4
+                        <-  21
+
+                        // 后缀自减 //
+                        let num1 = 2
+                        let num2 = 20
+                        let num3 = num1-- + num2
+                        let num4 = num1 + num2
+
+                        >>  num3
+                        <-  22
+                        >>  num4
+                        <-  21
+                    ```
+            2.对非数值类型的效用
+                自增自减应用于非数值类型时，会先将非数值型操作数转换为数值，再执行操作。规则如下
+                。。。
+                [-评论: 建议只用来操作数值，其他类型上的各种乱七八糟转换规则就别自找麻烦了。-]
+        2.正负号
+            1.语法
+                将操作符`+`、`-`置于目标值前。
+                ```js
+                    let some_value
+
+                    +some_value
+                    -some_value
+                ```
+            1.对非数值类型的效用
+                同自增自减。
+    2.位操作符
+        位操作符操作内存中表示数值的比特位。
+        ES 的所有数值都是以 IEEE-754 的64位格式存储的。不过，位操作并不直接将值应用到64位表示，而是先把值转换为32位整数，再执行位操作，最后将结果转换到64位表示。
+        所以其实对开发者而言，64位的底层结构是不可见的，仅考虑32位整数即可。
+        【】
+    3.布尔操作符
+        非、与、或。
+        1.非
+            符号：`!`
+            1.对非布尔值类型的效用
+                先将非布尔值型操作数转为布尔型，再取非。
+                1.转换任意类型值到布尔值 - !!
+                    使用连续两个非符，可以将任意值转为布尔值
+                    等效于使用 Boolean() 函数
+        2.与
+            符号：`&&`
+            1.对非布尔值类型的效用
+                不会将操作数转为布尔值，而是直接返回操作数。
+                1.短路取值
+                    当 && 左侧求值已能够决定结果，返回左值；否则，返回右值。
+        3.或
+            符号：`||`
+            1.对非布尔值类型的效用
+                不会将操作数转为布尔值，而是直接返回操作数。
+                1.短路取值
+                    当 || 左侧求值已能够决定结果，返回左值；否则，返回右值。
+        [-扩展:
+            与或操作的短路取值的特性，可以用于为变量"短路赋值"。
+            1.例子
+                ```js
+                    let a = { aa: 'aaa' }
+                    let b = { bb: 'bbb' }
+                    some_variable = a && b    // some_variable = b
+                ```
+        -]
+    4.乘性操作符  Multiplicative Operators   
+        乘、除、模。
+        1.乘  multiply   
+            符号：`*`
+            返回左值与右值的乘机
+        2.除  divide   
+            符号：`/`
+            返回左值除以右值的商
+        3.模  modulus   
+            符号：`%`
+            模，俗称“余”
+            返回左值除以右值的商的余
+        4.对非数值类型的效用
+            先将非数值型操作数转换为数值，再执行操作
+    5.指数操作符  Exponentiation Operator   
+        符号：`**`
+        对左值作「以右值为幂数」的乘方计算。
+        // 1.指数赋值操作符
+        //     符号：`**=`
+        //     ```js
+        //         let a = 3
+        //         a **= 2    // 9
+        //     ```
+    6.加性操作符  Additive Operators   
+        +.对非数值类型的效用
+            先将非数值型操作数转换为字串，再执行操作
+        1.加  add   
+            符号：`+`
+        2.减  subtract   
+            符号：`-`
+    7.关系操作符  Relational Operators   
+        符号：
+            `<`、`<=`
+            `>`、`>=`
+        1.对非数值类型的效用
+            1、字串
+                比较字串中的字符编码值大小
+                    e.g.
+                        A < a
+                        a < b
+            2、其一为数值
+                全部转为数值，再比较
+            3、对象
+                取 valueOf() 作比较，没有的话取 toString()
+    8.相等操作符  Equality Operators   
+        1.等于/不等于  equal/not equal   
+            在判断前，会将左右操作数转为同类型
+            符号：`==`、`!=`
+        2.全等/不全等  identically equal/not identically equal   
+            不会转换左右操作数类型
+            符号：`===`、`!==`
+        3.最佳实践
+            总是使用全等/不全等操作符。
+    9.条件操作符  Conditional Operator   
+        又称"三目运算符"
+        1.语法
+            ```js
+                some_variable = boolean_expression ? value_on_true : value_on_false
+            ```
+    10.赋值操作符  Assignment Operators   
+        符号：`=`
+        1.数学运算的复合赋值操作符  compound-assignment operators   
+            “复合赋值操作”即，运算后赋值，有：
+                *=      乘
+                /=      除
+                %=      取模
+                +=      加
+                -=      减
+                **=     乘方
+                <<=     左移
+                >>=     右移
+                >> =    无符号右移
+    11.逗号操作符  Comma Operator   
+        符号：`,`
+        在一条语句中一并声明多个变量。
+        e.g.
+            let num1 = 1, num2 = 2, num3 = 3
+        [-补充:
+            [-资料:
+                《CSDN博客 - JS中的逗号运算符（,）》
+                https://blog.csdn.net/JINGinC/article/details/120894611
+            -]
+            1.逗号操作符的行为
+                逗号操作符会，先执行左侧操作数，再执行右侧操作数，最后返回右侧操作数的求值。
+                【】
+        -]
+
+6.语句  statement   
+    语句是"流程控制语句"的简称，语句用来完成一个执行任务。
+    1.if
+        【】
+    2.do-while
+        【】
+    3.while
+        【】
+    4.for
+        【】
+    5.for-in
+        【】
+    6.for-of
+        【】
+    7.标签语句  labeled statements   
+        【】
+    8.break、continue
+        【】
+    9.with
+        【】
+    10.switch
+        【】
+
+7.函数  function   
+    。。。在第10章会详细讲解函数，这里不做展开。
+
+// END

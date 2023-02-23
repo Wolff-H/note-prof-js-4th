@@ -1,0 +1,145 @@
+>>>>
+```yaml
+标题: 2.HTML中的JavaScript
+```
+<<<<
+
+
+
+在 js 早期，为了向 html 中引入脚本，且能够安全兼容，网景公司最终采用 <script> 元素方式。
+
+1.<script>元素
+    <script> 元素用于向 html 插入 JavaScript。
+    .基础
+        1.属性
+            · async
+                脚本的下载是异步的，不会阻塞页面其他操作。
+                只对外部脚本有效。
+            · charset
+                由 src 指定的代码的字符集。基本没用，因为浏览器不关心这个。
+            · crossorigin
+                对脚本资源的请求，的 CORS 设置。
+            · defer
+                令脚本延迟到文档完全解析与显示完成后，再执行。
+                只对外部脚本有效。
+            · integrity
+                比对接收到的资源与指定的加密签名，以验证子资源完整性（"Subresource Integrity (SRI)"）。
+                如果验证失败，页面报错。
+            · language
+                废弃。早期用来指示何种脚本语言，如 JavaScript、JavaScript 1.2、VBScript 等。但现在 js 一统江湖了。
+            · src
+                脚本资源 url。
+            · type
+                指示脚本语言类型。
+                默认值为 text/javascript，当值为 module 时被视为 ES6 模块，可使用 import / export。
+        2.引入方式
+            1.行内
+                脚本代码写在 html 中的 script 标签中
+                1.例子
+                    ```html
+                        <script>
+                            function sayHi()
+                            {
+                                console.log('Hi!');
+                            }
+                        </script>
+                    ```
+                上面代码中的函数会被保存在解释器环境中，在脚本被计算完成前，后面的页面代码不会被执行。
+                1.行内js闭合标签字
+                    行内js的代码内容中不能出现字符串`</script>`，会被浏览器解析为一段代码的结束。
+                    将`/`转译为纯文本可解:
+                    1.例子
+                    ```html
+                        <script>
+                            function sayHi()
+                            {
+                                console.log('</script>');
+                                // console.log('<\/script>');
+                            }
+                        </script>
+                    ```
+            2.外部
+                脚本代码写在外部的文件中
+                1.例子
+                    ```xml
+                        <script src="example.js"></script>
+                        <script src="example.js" />    // 仅在部分XHTML文档中允许这样写
+                    ```
+                外部代码资源按惯例以`.js`后缀，但不必须。只要服务器返回资源时在报文头中写明正确的MIME类型。
+                对于外部脚本，浏览器会发送get请求来获取资源。
+    1.标签位置
+        早期，放在`<head>`中
+            · 好处：与css文件集中放置
+            · 坏处：加载脚本会阻塞页面
+        如今，放在`<body>`结束前
+            · 好处：避免阻塞页面
+    2.推迟执行 - defer
+        令脚本推迟到整个页面加载完成后
+        只支持外部脚本
+        当有多个延迟脚本时，它们的调用顺序并不一定会遵照它们出现的顺序，所以最好只放一个延迟脚本。
+    3.异步执行 - async
+        将脚本加载独立出文档正常加载流
+    4.动态加载脚本
+        在 js 中调用 DOM API 向文档添加 script 元素，实现异步加载该脚本。
+        1.预加载资源
+            令浏览器预加载静态资源，但加载后不执行，在需要执行的时机再执行。
+            1.link 标签创建
+                ```html
+                    <link rel="preload" href="/path/to/style.css" as="style">
+                ```
+            2.用脚本动态创建
+                ```html
+                    <script>
+                        const link = document.createElement('link');
+                        link.rel = 'preload';
+                        link.as = 'style';
+                        link.href = '/path/to/style.css';
+                        document.head.appendChild(link);
+                    </script>
+                ```
+    5.XHTML
+        扩展的、更严格的HTML。但是已经被压死在了历史的车轮下。
+        。。。
+    6.废弃的语法
+        。。。
+
+2.行内代码 & 外部文件
+    1.最佳实践 - 使用外部js
+        理由是：
+            · 可维护性
+                字面意思
+            · 缓存
+                浏览器会缓存外链的 js 文件
+            · 兼容性
+                外部 js 独立于 html，不与之发生冲突
+        
+3.文档模式
+    指示浏览器以何种文档标准解析文档
+    1.文档模式
+        文档模式有两种
+        · 标准模式 standard mode
+            实现 w3c 规范的 html 解析标准
+        · 怪异模式 quirk mode（任何非标准模式）
+            使用浏览器自家的 html 解析标准
+    2.例子
+        ```html
+            <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">    严格模式
+            <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">    过渡模式
+            <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">    框架模式
+        ```
+
+4.<noscript> 元素
+    `<noscript>`中可写任何在`<body>`级以内的 HTML 元素，当
+        · 浏览器不支持脚本
+        · 浏览器禁用了脚本
+    时，显示 <noscript> 中的内容
+    1.例子
+        ```html
+            <body>
+                <noscript>
+                    <p>This page requires JavaScript enabled.</p>
+                </noscript>
+            </body>
+        ```
+
+//
