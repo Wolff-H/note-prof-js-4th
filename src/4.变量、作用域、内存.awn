@@ -145,133 +145,130 @@
 2.执行上下文 & 作用域  execution context & scope   
     "执行上下文 (execution context)"简称"上下文 (context)"。变量/函数的上下文决定了它们可访问的数据，以及它们的行为。
     每个上下文都有一个关联的"变量对象 (variable object)"，所有在该上下文中定义的变量/函数都存在于这个对象上。变量对象无法通过代码访问（因为是实现在语言规范/引擎上的），但是后台在处理数据时会用到它。
-    <[bookmark] comment="记得为 awn 语法实现“额外主题”（也就是前缀+号的主题）。然后弃用并修订所有的[-细分主题-]层次。">
-    [-细分主题:
-        1.全局上下文  global execution context   
-            执行上下文有两种，函数上下文（即一般上下文）和全局上下文。
-            全局上下文是最外层的上下文，根据ES的宿主环境不同而不同。
-                在浏览器环境中，全局上下文是`window`
-                在 Node.js 环境中，全局上下文是`global`
-            1.全局上下文中的 var、let、const 声明
-                在全局上下文中，声明的 var、let、const 都会存在于上下文中，但只有 var 声明的变量会被添加到全局对象上。
-            上下文在其所有代码都执行完后，会被销毁。
-        2.ES代码执行流
-            每个"函数调用 (function call)"都有自己的上下文。当"代码执行 (code execution)"流入函数时，函数的上下文会被推入一个"上下文栈 (context stack)"。在函数执行完之后，上下文栈会弹出该函数上下文，将控制权返还给之前的执行上下文。
-            
-            上下文在执行其中代码时，（引擎）会创建一个由上下文变量对象们构成的"作用域链 (scope chain)"。作用域链提供了，对，执行上下文进入的所有变量与函数的顺序访问。
-            [-补充|资料:
-                参考资料 <[link] url="https://softwareengineering.stackexchange.com/questions/189967/what-is-an-activation-object-in-javascript">
-                参考资料 <[link] url="https://stackoverflow.com/questions/6337344/activation-and-variable-object-in-javascript/21324672#21324672">
-                1.执行上下文  execution context   
-                    "执行上下文 (execution context)"是一个由
-                        1、"变量对象 (variable object)"
-                            若当前执行在函数，则这个变量对象在性质上是"活动对象 (activation object)"
-                        2、"作用域链 (scope chain)"
-                            外部逐层的上下文变量对象构成的顺序链。
-                        3、"this"值
-                    一起构成的对象。
-                2.变量对象  variable object   
-                    "变量对象 (variable object)"是一个抽象概念。
-                        1、在当前执行上下文是"全局 (global)"时，变量对象就是「全局」。
-                            取决于环境，「全局」可以是`window`、`document`、`global`等。
-                        2、在当前执行上下文是"函数 (function)"时，变量对象就是"活动对象 (activation object)"。
-                            应当注意到，ECMAScript 规定了，函数是定义作用域的源。
-                3.活动对象  activation object   
-                    "活动对象 (activation object)"是一个由
-                        1、当前函数的合法的入参们。
-                        2、当前函数的入参集合`arguments`对象。
-                        3、当前函数的内部的任何变量与（具名）函数。
-                    一起构成的对象。
-            -]
+    +1.全局上下文  global execution context   
+        执行上下文有两种，函数上下文（即一般上下文）和全局上下文。
+        全局上下文是最外层的上下文，根据ES的宿主环境不同而不同。
+            在浏览器环境中，全局上下文是`window`
+            在 Node.js 环境中，全局上下文是`global`
+        1.全局上下文中的 var、let、const 声明
+            在全局上下文中，声明的 var、let、const 都会存在于上下文中，但只有 var 声明的变量会被添加到全局对象上。
+        上下文在其所有代码都执行完后，会被销毁。
+    +2.ES代码执行流
+        每个"函数调用 (function call)"都有自己的上下文。当"代码执行 (code execution)"流入函数时，函数的上下文会被推入一个"上下文栈 (context stack)"。在函数执行完之后，上下文栈会弹出该函数上下文，将控制权返还给之前的执行上下文。
+        
+        上下文在执行其中代码时，（引擎）会创建一个由上下文变量对象们构成的"作用域链 (scope chain)"。作用域链提供了，对，执行上下文进入的所有变量与函数的顺序访问。
+        [-补充|资料:
+            参考资料 <[link] url="https://softwareengineering.stackexchange.com/questions/189967/what-is-an-activation-object-in-javascript">
+            参考资料 <[link] url="https://stackoverflow.com/questions/6337344/activation-and-variable-object-in-javascript/21324672#21324672">
+            1.执行上下文  execution context   
+                "执行上下文 (execution context)"是一个由
+                    1、"变量对象 (variable object)"
+                        若当前执行在函数，则这个变量对象在性质上是"活动对象 (activation object)"
+                    2、"作用域链 (scope chain)"
+                        外部逐层的上下文变量对象构成的顺序链。
+                    3、"this"值
+                一起构成的对象。
+            2.变量对象  variable object   
+                "变量对象 (variable object)"是一个抽象概念。
+                    1、在当前执行上下文是"全局 (global)"时，变量对象就是「全局」。
+                        取决于环境，「全局」可以是`window`、`document`、`global`等。
+                    2、在当前执行上下文是"函数 (function)"时，变量对象就是"活动对象 (activation object)"。
+                        应当注意到，ECMAScript 规定了，函数是定义作用域的源。
+            3.活动对象  activation object   
+                "活动对象 (activation object)"是一个由
+                    1、当前函数的合法的入参们。
+                    2、当前函数的入参集合`arguments`对象。
+                    3、当前函数的内部的任何变量与（具名）函数。
+                一起构成的对象。
+        -]
 
-            作用域链的最前端，总是，当前执行上下文的变量对象。
-                若当前执行上下文是函数，而非根环境，则其变量对象被特别称为"活动对象 (activation object)"。活动对象仅在函数执行时被创建。
-            作用域链的下一节，是包含上下文的变量对象。
-            作用域链的下下一节，是包包含上下文的变量对象。
-            作用域链的下下下一节，是包包包含上下文的变量对象。
-            .
-            .
-            .
-            直至全局上下文（根环境）。
-            1.例子
-                ```js
-                    function compare(value1,value2)
+        作用域链的最前端，总是，当前执行上下文的变量对象。
+            若当前执行上下文是函数，而非根环境，则其变量对象被特别称为"活动对象 (activation object)"。活动对象仅在函数执行时被创建。
+        作用域链的下一节，是包含上下文的变量对象。
+        作用域链的下下一节，是包包含上下文的变量对象。
+        作用域链的下下下一节，是包包包含上下文的变量对象。
+        .
+        .
+        .
+        直至全局上下文（根环境）。
+        1.例子
+            ```js
+                function compare(value1,value2)
+                {
+                    if(value1 < value2)
                     {
-                        if(value1 < value2)
-                        {
-                            return -1
-                        }
-                        else if(value1 > value2)
-                        {
-                            return 1
-                        }
-                        else
-                        {
-                            return 0
-                        }
+                        return -1
                     }
-                    var result = compare(5, 10)
-                ```
-                1.解析
-                    在全局执行上下文中，执行到"调用 compare() 函数"时，JS 引擎创建了一个活动对象：
-                        活动对象 =
-                        {
-                            arguments: [5, 10],
-                            value1: 5,
-                            value2: 10,
-                        }
-        3.标识符解析
-            在代码执行时，"标识符 (identifier)"的解析是沿着作用域逐级搜索标识符名完成的。从作用域链最前端逐级向后搜索。如果在一次搜索中没有找到标识符，则报错。
-            1.例子 - 向上查找一级
-                ```js
-                    var color = 'blue'
-
-                    function changeColor()
+                    else if(value1 > value2)
                     {
-                        if(color === 'blue')
-                        {
-                            color = 'red'
-                        }
-                        else
-                        {
-                            color = 'blue'
-                        }
+                        return 1
                     }
-
-                    changeColor()
-                ```
-                对于这个例子，函数 changeColor() 的作用域链包含两个对象：
-                    1、它自己的变量对象
-                    2、全局上下文的变量对象
-                changeColor() 能够访问到变量 color，是因为在这个函数的作用域链向上（向外）查找，可以找到标识名为 color 的值。
-            2.例子 - 向上查找多级
-                ```js
-                    var color = 'blue'
-
-                    function changeColor()
+                    else
                     {
-                        let anotherColor = 'red'
+                        return 0
+                    }
+                }
+                var result = compare(5, 10)
+            ```
+            1.解析
+                在全局执行上下文中，执行到"调用 compare() 函数"时，JS 引擎创建了一个活动对象：
+                    活动对象 =
+                    {
+                        arguments: [5, 10],
+                        value1: 5,
+                        value2: 10,
+                    }
+    +3.标识符解析
+        在代码执行时，"标识符 (identifier)"的解析是沿着作用域逐级搜索标识符名完成的。从作用域链最前端逐级向后搜索。如果在一次搜索中没有找到标识符，则报错。
+        1.例子 - 向上查找一级
+            ```js
+                var color = 'blue'
 
-                        function swapColors()
-                        {
-                            let tempColor = anotherColor
-                            anotherColor = color
-                            color = tempColor
-                            
-                            // 这里可以访问color、anotherColor 和tempColor 
-                        } 
+                function changeColor()
+                {
+                    if(color === 'blue')
+                    {
+                        color = 'red'
+                    }
+                    else
+                    {
+                        color = 'blue'
+                    }
+                }
+
+                changeColor()
+            ```
+            对于这个例子，函数 changeColor() 的作用域链包含两个对象：
+                1、它自己的变量对象
+                2、全局上下文的变量对象
+            changeColor() 能够访问到变量 color，是因为在这个函数的作用域链向上（向外）查找，可以找到标识名为 color 的值。
+        2.例子 - 向上查找多级
+            ```js
+                var color = 'blue'
+
+                function changeColor()
+                {
+                    let anotherColor = 'red'
+
+                    function swapColors()
+                    {
+                        let tempColor = anotherColor
+                        anotherColor = color
+                        color = tempColor
                         
-                        // 这里可以访问color 和anotherColor，但访问不到tempColor 
-                        
-                        swapColors(); 
-                    }
+                        // 这里可以访问color、anotherColor 和tempColor 
+                    } 
+                    
+                    // 这里可以访问color 和anotherColor，但访问不到tempColor 
+                    
+                    swapColors(); 
+                }
 
-                    // 这里只能访问color 
+                // 这里只能访问color 
 
-                    changeColor(); 
-                ```
-                注意，函数参数也是当前上下文的变量（这在函数参数按值传递时讲过），和上下文中其他变量遵循一样的访问行为。
-    -]
+                changeColor(); 
+            ```
+            注意，函数参数也是当前上下文的变量（这在函数参数按值传递时讲过），和上下文中其他变量遵循一样的访问行为。
     1.作用域链增强  scope chain augmentation   
         执行上下文主要是「全局上下文」、「函数上下文」两种，另外在 eval() 调用的内部会存在第三种「eval上下文」。
         某些语句可以在作用域链前端临时添加一个上下文，这个上下文在代码执行完后会被删除。这在如下两种情况时会发生：
