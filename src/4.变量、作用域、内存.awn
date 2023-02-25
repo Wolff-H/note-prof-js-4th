@@ -1,0 +1,443 @@
+>>>>
+```yaml
+标题: 4.变量、作用域、内存  variable、scope、memory   
+摘要:
+    - 变量与原始值、引用值
+    - 执行上下文
+    - 垃圾回收
+```
+<<<<
+
+
+
+1.原始值 & 引用值  primitive value & reference value   
+    ES的变量可包含2种值类型: 原始值、引用值。
+    "原始值 primitive value"是最简原子化数据单位。
+    "引用值 reference value"是由多个值一起构成的对象。
+    存储原始值的变量，在访问该变量时，直接访问该原始值。称"按值访问(by value)"。
+    存储引用值的变量，在访问该变量时，访问该变量的引用。称"按引用访问(by reference)"。
+    注意，在大多数语言中，字串是作为对象存储的。
+
+    1.动态属性  dynamic properties   
+        对一个引用型变量（引用型的值必然是对象），可以动态修改其属性。
+        1.例子
+            ```js
+                let psycho = new Object()
+                psycho.name = 'Joe'
+            ```
+    2.复制值  copying values   
+        原始值是简单值，存放在栈中；引用值是复杂值，存放在堆中。
+        栈的查找速度更快；堆的存储空间更大。
+        原始值不可更改，相当稳定；引用值可以自由扩展，需求空间。
+        1.赋值的底层机制
+            给变量复制一个
+                1、原始值
+                    向目标变量复制进的是`值`
+                    1.例子
+                        ```js
+                            let a = 66
+                            let b = a
+                        ```
+                        名     值
+                        ·--------------------·          ·--------------------·
+                        |  a  |  66          |          |  a  |  66          |
+                        ·--------------------·          ·--------------------·
+                        |     |              |    =>    |  b  |  66          |
+                        ·--------------------·          ·--------------------·
+                        |     |              |          |     |              |
+                        ·--------------------·          ·--------------------·
+                2、引用值
+                    向目标变量复制进的是`引用`
+                    1.例子
+                        ```js
+                            let a = new Object()
+                            let b = a
+                        ```
+                        名     值
+                        ·--------------------·          ·--------------------·
+                        |  a  |  ref_Object  |          |  a  |  ref_Object  |
+                        ·--------------------·          ·--------------------·
+                        |     |              |    =>    |  b  |  ref_Object  |
+                        ·--------------------·          ·--------------------·
+                        |     |              |          |     |              |
+                        ·--------------------·          ·--------------------·
+    3.函数传参  argument passing   
+        [-参考:
+            《JS传参: 传值还是传引用？》
+            https://zhuanlan.zhihu.com/p/234992146
+        -]
+        1.原理
+            在向函数传参时，函数内部会建立相应的参数名变量，然后复制一份入参的值给参数名变量。参数名变量在下面简称为“名变量”。
+            也即：
+                当入参的值是基本值，名变量直接赋为该基本值。（如 1、123、'abc' 等）
+                当入参的值是引用值，名变量直接赋为该引用值。（如 0x00001001、0x00001002 等）
+            在表现上，非常类似于传入引用，但其实不是。是在本地创建了对入参值复制的名变量。
+            [-补充:
+                这一过程其实就如同普通的变量复制值
+                1.例子
+                    ```js
+                        let a = { aa: 'aaa' }
+                        let b = a
+
+                        b = { bb: 'bbb' }
+                    ```
+                    在最后一行，如果将 b 覆写，将会消除 b 与 a 的联系。
+            -]
+        1.例子
+            ```js
+            /* 01 */    function setName(obj)
+            /* 02 */    {
+            /* 03 */        obj.name = 'Nicholas'
+            /* 04 */        obj = new Object()
+            /* 05 */        obj.name = 'Greg'
+            /* 06 */    }
+            /* 07 */
+            /* 08 */    let person = new Object()
+            /* 09 */    setName(person)
+            /* 10 */
+            /* 11 */    console.log(person.name)  // "Nicholas"
+            ```
+            1.解析
+                在 01 行，传入的变量 obj 其实是对 person 的值的复制（一个函数域的名变量）。
+                在 04 行，被覆写的是这个名变量 obj，所以并不影响外部的 person。
+    4.判定类型  determining type   
+        1.判定变量的原始类型
+            判定变量的原始类型，使用`typeof`操作符。
+            typeof 操作符用来判定原始值时很好用，它会如实返回 string、number、boolean、undefined 的结果。
+            但是，对于是 null 或 object 类型的值，它都会返回 object。
+            1.typeof
+                1.语法
+                    ```js
+                        typeof some_value
+                    ```
+                    语句返回被判定值的类型字串（有 'string'、'number'、'boolean'、'undefined'、'symbol'、'object'、、）
+            [-补充:
+                1.完整的 typeof 判定表
+                    类型：              判定结果：
+                    `Undefined`         "undefined"
+                    `Null`              "object" // 原因参见下方主题
+                    `Boolean`           "boolean"
+                    `Number`            "number"
+                    `BigInt`            "bigint"
+                    `String`            "string"
+                    `Symbol`            "symbol"
+                    `Function`          "function"
+                    `Class`             "function" // 类（Class）等价于 function
+                    `任何其它对象`	     "object"
+                2.typeof null 的历史源流
+                    typeof null 会判定为 object。这是 JS 语言本身的设计失误。
+                    在 JS 的最初实现中，JS 中的值是由一个类型标记标签和实际数据值联合表示的。
+                    对象的类型标签是`0`，而 null 在语义上表示「空指针」（空指针在绝大多数平台下的值被设为 0x00）。因为这个缘故，null 的类型标签也被记为 0，与 Object 的类型标签相同。
+                    ES 标准委员会曾有过判定 null 为 null 的提案，但是被否了[笑哭]。
+            -]
+        2.判定变量的引用类型
+            实际上，大多数时候我们并不关心一个值是不是对象类型，而是想知道它是什么类型的对象。
+            为此，使用`instanceof`操作符。
+            1.instanceof
+                1.语法
+                    ```js
+                        some_instance instanceof SomeClass
+                    ```
+                    语句返回布尔值，是否左侧实例是右侧指定的引用类型。为真则表明实例变量属于该类。
+                    用 instanceof 检测 Object 构造函数，将恒返回 true。因为所有引用类型都是 Object 的实例。
+                    用 instanceof 检测 原始值，将恒返回 false。因为原始值不是对象。
+
+2.执行上下文 & 作用域  execution context & scope   
+    "执行上下文 (execution context)"简称"上下文 (context)"。变量/函数的上下文决定了它们可访问的数据，以及它们的行为。
+    每个上下文都有一个关联的"变量对象 (variable object)"，所有在该上下文中定义的变量/函数都存在于这个对象上。变量对象无法通过代码访问（因为是实现在语言规范/引擎上的），但是后台在处理数据时会用到它。
+    <[bookmark] comment="记得为 awn 语法实现“额外主题”（也就是前缀+号的主题）。然后弃用并修订所有的[-细分主题-]层次。">
+    [-细分主题:
+        1.全局上下文  global execution context   
+            执行上下文有两种，函数上下文（即一般上下文）和全局上下文。
+            全局上下文是最外层的上下文，根据ES的宿主环境不同而不同。
+                在浏览器环境中，全局上下文是`window`
+                在 Node.js 环境中，全局上下文是`global`
+            1.全局上下文中的 var、let、const 声明
+                在全局上下文中，声明的 var、let、const 都会存在于上下文中，但只有 var 声明的变量会被添加到全局对象上。
+            上下文在其所有代码都执行完后，会被销毁。
+        2.ES代码执行流
+            每个"函数调用 (function call)"都有自己的上下文。当"代码执行 (code execution)"流入函数时，函数的上下文会被推入一个"上下文栈 (context stack)"。在函数执行完之后，上下文栈会弹出该函数上下文，将控制权返还给之前的执行上下文。
+            
+            上下文在执行其中代码时，（引擎）会创建一个由上下文变量对象们构成的"作用域链 (scope chain)"。作用域链提供了，对，执行上下文进入的所有变量与函数的顺序访问。
+            [-补充|资料:
+                参考资料 <[link] url="https://softwareengineering.stackexchange.com/questions/189967/what-is-an-activation-object-in-javascript">
+                参考资料 <[link] url="https://stackoverflow.com/questions/6337344/activation-and-variable-object-in-javascript/21324672#21324672">
+                1.执行上下文  execution context   
+                    "执行上下文 (execution context)"是一个由
+                        1、"变量对象 (variable object)"
+                            若当前执行在函数，则这个变量对象在性质上是"活动对象 (activation object)"
+                        2、"作用域链 (scope chain)"
+                            外部逐层的上下文变量对象构成的顺序链。
+                        3、"this"值
+                    一起构成的对象。
+                2.变量对象  variable object   
+                    "变量对象 (variable object)"是一个抽象概念。
+                        1、在当前执行上下文是"全局 (global)"时，变量对象就是「全局」。
+                            取决于环境，「全局」可以是`window`、`document`、`global`等。
+                        2、在当前执行上下文是"函数 (function)"时，变量对象就是"活动对象 (activation object)"。
+                            应当注意到，ECMAScript 规定了，函数是定义作用域的源。
+                3.活动对象  activation object   
+                    "活动对象 (activation object)"是一个由
+                        1、当前函数的合法的入参们。
+                        2、当前函数的入参集合`arguments`对象。
+                        3、当前函数的内部的任何变量与（具名）函数。
+                    一起构成的对象。
+            -]
+
+            作用域链的最前端，总是，当前执行上下文的变量对象。
+                若当前执行上下文是函数，而非根环境，则其变量对象被特别称为"活动对象 (activation object)"。活动对象仅在函数执行时被创建。
+            作用域链的下一节，是包含上下文的变量对象。
+            作用域链的下下一节，是包包含上下文的变量对象。
+            作用域链的下下下一节，是包包包含上下文的变量对象。
+            .
+            .
+            .
+            直至全局上下文（根环境）。
+            1.例子
+                ```js
+                    function compare(value1,value2)
+                    {
+                        if(value1 < value2)
+                        {
+                            return -1
+                        }
+                        else if(value1 > value2)
+                        {
+                            return 1
+                        }
+                        else
+                        {
+                            return 0
+                        }
+                    }
+                    var result = compare(5, 10)
+                ```
+                1.解析
+                    在全局执行上下文中，执行到"调用 compare() 函数"时，JS 引擎创建了一个活动对象：
+                        活动对象 =
+                        {
+                            arguments: [5, 10],
+                            value1: 5,
+                            value2: 10,
+                        }
+        3.标识符解析
+            在代码执行时，"标识符 (identifier)"的解析是沿着作用域逐级搜索标识符名完成的。从作用域链最前端逐级向后搜索。如果在一次搜索中没有找到标识符，则报错。
+            1.例子 - 向上查找一级
+                ```js
+                    var color = 'blue'
+
+                    function changeColor()
+                    {
+                        if(color === 'blue')
+                        {
+                            color = 'red'
+                        }
+                        else
+                        {
+                            color = 'blue'
+                        }
+                    }
+
+                    changeColor()
+                ```
+                对于这个例子，函数 changeColor() 的作用域链包含两个对象：
+                    1、它自己的变量对象
+                    2、全局上下文的变量对象
+                changeColor() 能够访问到变量 color，是因为在这个函数的作用域链向上（向外）查找，可以找到标识名为 color 的值。
+            2.例子 - 向上查找多级
+                ```js
+                    var color = 'blue'
+
+                    function changeColor()
+                    {
+                        let anotherColor = 'red'
+
+                        function swapColors()
+                        {
+                            let tempColor = anotherColor
+                            anotherColor = color
+                            color = tempColor
+                            
+                            // 这里可以访问color、anotherColor 和tempColor 
+                        } 
+                        
+                        // 这里可以访问color 和anotherColor，但访问不到tempColor 
+                        
+                        swapColors(); 
+                    }
+
+                    // 这里只能访问color 
+
+                    changeColor(); 
+                ```
+                注意，函数参数也是当前上下文的变量（这在函数参数按值传递时讲过），和上下文中其他变量遵循一样的访问行为。
+    -]
+    1.作用域链增强  scope chain augmentation   
+        执行上下文主要是「全局上下文」、「函数上下文」两种，另外在 eval() 调用的内部会存在第三种「eval上下文」。
+        某些语句可以在作用域链前端临时添加一个上下文，这个上下文在代码执行完后会被删除。这在如下两种情况时会发生：
+            1、try/catch 语句的 catch
+            2、with 语句
+        1.catch
+            catch 语句会创建一个新的变量对象，这个变量对象包含对抛出的错误对象的声明。
+        2.with
+            在作用域链前端添加一个指定的对象（该对象是代码中的显式的对象，而不是上下文变量对象，那个是访问不到的）。
+            [-资料:
+                《JavaScript中 with 的用法》
+                https://zhuanlan.zhihu.com/p/97850060
+            -]
+            1.语法
+                with(some_object)
+                {
+                    // executions
+                }
+            [-注释:以下主题是扩展内容-]
+            2.例子
+                ```js
+                    var a_quite_long_name_object =
+                    {
+                        a: 1,
+                        b: 2,
+                        c: 3,
+                    }
+                    
+                    // 要更新其中的项，正常写法是 //
+                    a_quite_long_name_object.a = 2
+                    a_quite_long_name_object.b = 3
+                    a_quite_long_name_object.c = 4
+
+                    // 要更新其中的项，with写法是 //
+                    with(a_quite_long_name_object)
+                    {
+                        a = 3
+                        b = 4
+                        c = 5
+                    }
+                    // 奇技淫巧了属于是 ~
+                ```
+            3.缺陷
+                1、数据泄露
+                2、性能下降
+            4.最佳实践
+                不要使用 with
+    2.变量声明  variable declaration   
+        未作声明而直接初始化的变量，会被添加到全局上下文。
+        [-补充: 在严格模式下，未作声明而直接初始化变量的语句，会直接报错。 -]
+        1.var
+            `var`声明的变量，会被自动添加到最近的上下文。
+            1.声明提升  hoisting   
+                JS引擎会检查函数中所有的 var 声明，将它们通通提到函数顶部，位于所有其他代码前。
+                [-补充|注释:
+                    这一提升行为在正式顺序执行代码前被执行一遍。
+                    如此设计的考虑是，不用考虑作用域中是否已经定义了同名变量，允许随意新建声明。
+                -]
+        2.let
+            let 跟正常编程语言一样，必须先声明再使用，且不能重复声明。
+            1.块作用域
+                let 声明的变量，只作用于所在代码块中。
+                [-扩展:
+                    1.块级作用域
+                        由最近的一对花括号`{}`框定包含的词法范围是一个块作用域。
+                        也即，if 块、while 块、function 块、或甚至单独手写的一个花括号范围，都是块作用域。
+                -]
+            2.暂时性死区
+                let 必须先声明后使用。
+                。。。略教科书解释。
+                [-补充:
+                    1.暂时性死区  Temporal Dead Zone   
+                        "暂时性死区 (Temporal Dead Zone)"是一种状态，表示变量"不可达 (unreachable)"。
+                        严格来讲，在实际的 JS 运行时中，let 和 const 也会在第一遍的代码扫描中被提升到顶部，引擎是知道代码中存在这些标识名的 let 和 const 声明的。
+                        但是，在直到真正执行到其声明前，的一片执行区域中，这些变量都是不可达的（而 var 声明的标识名会作 undefined）。
+                        总结而言，「暂时性死区」就是，变量尽管被提升了，但在其正式声明前都不可用，的一片区域（一种状态）。
+                -]
+        3.const
+            const 的用法与 let 基本一致。额外的，const 必须显式初始化。
+            1.必须显式初始化
+                const 声明必须显式初始化，否则编译器报错。
+                1.例子
+                    ```js
+                        const a // SyntaxError: Missing initializer in const declaration
+                    ```
+                2.声明的顶级原语不可变  immutable toplevel   
+                    const 声明的引用不可变，也即，其声明的基本值或对象不可改。
+                    不过声明的对象的内容可改，因为那就不是 const 的顶级原语了。
+                    如果要令声明的整个对象不可改，使用 Object.freeze()。
+            2.最佳实践
+                在可能的情况下，尽量多的使用 const。有两点原因：
+                    1、const 声明暗示变量的类型不变，可被 JS 引擎优化。
+                    2、const 声明明示变量的值不变，避免了意外的重新赋值导致的bug。
+        4.标识符查找  identifier lookup   
+            。。。
+            参见章节 <[link] url="#2">
+
+3.垃圾回收（GC)  garbage collection   
+    JavaScript 是一门使用了垃圾回收的语言，意为，执行环境负责在代码执行时管理内存。
+    相对比的，在 C、C++ 中，需要开发者自己手动跟踪管理内存使用，这带来巨大的开发负担，同时也易造成诸多问题。
+    垃圾回收程序会周期型的自动运行。
+    浏览器垃圾回收主要有标记清理、引用计数这两种策略。
+    1.标记清理  mark-and-sweep   
+        标记清理是JS中最常用的GC策略。
+        1.机制
+            当变量进入执行上下文，如在函数中声明一个变量，该变量被标记为“存在于执行上下文中”；当变量离开执行上下文，该变量被标记为“脱离于执行上下文外”。
+            在GC周期时，只保留标记在上下文中的变量，清除其他的，释放内存。
+    2.引用计数
+        引用计数是JS中较少用的GC策略。
+        1.机制
+            声明一个变量，然后赋给它一个引用值时，这个值的引用数为1。
+            当该值也被分配给另一个变量，该值引用数+1。
+            当某个变量断开了对该值的引用，该值引用数-1。
+            在下一个GC周期，释放引用数为0的值的内存。
+        1.缺陷
+            1.循环引用  circular reference   
+                当两个对象互相含有指向对方的指针，它们永远不会被释放。
+    3.性能
+        GC的周期调度策略，各浏览器厂家的引擎不尽相同。
+    4.内存管理
+        操作系统分配给浏览器的内存通常比桌面软件要少很多，主要是出于安全考虑，避免脚本吃太多内存。所以内存管理就很重要。
+        +1.解除引用  dereferencing   
+            如果一个数据不再需要，将它设置为null，从而释放引用。
+            此方法尤其适合于全局变量/全局属性，因为全局环境不会被标记清扫。
+        1.通过 const、let 提升性能
+            const、let 以块（而非函数）作为作用域，比函数作用域的标记判定细粒度更小，能更早地令GC介入。
+        2.隐藏类和删除操作  hidden class & delete   
+            【】
+        3.内存泄漏  memory leaks   
+            在开发者代码中，绝大部分的内存泄漏都是不合理的引用导致的。通常在这些情况下发生：
+            1.意外创建的全局变量
+                1.例子
+                    ```js
+                        function setName()
+                        {
+                            name = 'Psycho'
+                        }
+                    ```
+                    变量 name 会被添加到 window 上并常驻存在。
+                    不过一个正常的开发者应该不会有这么不规范的写法。
+            2.闭包引用
+                关于闭包的内容详见 <[link] url="file://./10.函数.awn?to=#14.2">
+                1.例子 - 函数闭包
+                    ```js
+                        let outer = function()
+                        {
+                            let name = 'Psycho'
+                            
+                            return function()
+                            {
+                                return name
+                            }
+                        }
+                    ```
+                    调用 outer() 会导致 name 的内存被泄露。只要 outer() 返回的函数存在，就会一直持有对 name 的引用。
+                2.例子 - 定时器闭包
+                    ```js
+                        let name = 'Psycho'
+
+                        setInterval(() => { 
+                            console.log(name)
+                        }, 100)
+                    ```
+                    只要定时器一直在运行，回调函数中引用的 name 就会一直占用内存。
+        4.静态分配与对象池  static allocation & object pools   
+            这个属于极端优化，在大多数时候是过早优化，不用考虑。
+            。。。
+
+// DOCEND
